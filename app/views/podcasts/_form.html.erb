@@ -1,0 +1,9 @@
+<% if podcast.errors.any? %>
+  <p class="notice">The record was not saved: <%= podcast.errors.full_messages.join(", ") %></p>
+<% end %>
+<%= form_for podcast do |f| %>
+  <div><%= f.label :feed_url %><%= f.text_field :feed_url %></div>
+  <div><%= f.label :title %><%= f.text_field :title %></div>
+  <div><%= f.label :slug %><%= f.text_field :slug %></div>
+  <div><%= f.submit "Save" %></div>
+<% end %>

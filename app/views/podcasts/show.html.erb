@@ -1,0 +1,13 @@
+<h1>Podcast #<%= @podcast.id %> - <%= @podcast.title %></h1>
+<p><%= link_to "rss", @podcast.feed_url %></p>
+<p>Episodes count - <%= @podcast.podcast_episodes.count %></p>
+<table>
+  <% @podcast.podcast_episodes.each do |ep| %>
+    <tr>
+      <td><%= ep.title %></td>
+      <td><%= ep.slug %></td>
+      <td><%= ep.published_at %></td>
+    </tr>
+  <% end %>
+</table>
+

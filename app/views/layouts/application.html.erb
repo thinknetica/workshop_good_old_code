@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Podcasts</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
+    <%= stylesheet_link_tag "application" %>
+  </head>
+
+  <body>
+    <% if flash[:notice] %>
+      <p class="notice"><%= flash[:notice] %></div>
+    <% end %>
+    <% if flash[:error] %>
+      <p class="error"><%= flash[:error] %></div>
+    <% end %>
+    <%= yield %>
+  </body>
+</html>

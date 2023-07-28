@@ -1,0 +1,18 @@
+<h1>Podcasts</h1>
+<%= link_to "New podcast", new_podcast_path %>
+<table>
+  <tr><th>Title</th><th>Feed</th><th>Slug</th><th>Episodes count</th><th>Notice</th><th>Actions</th></tr>
+  <% @podcasts.each do |podcast| %>
+    <tr>
+      <td><%= link_to podcast.title, podcast_path(podcast) %></td>
+      <td><%= link_to podcast.feed_url, podcast.feed_url %></td>
+      <td><%= podcast.slug %></td>
+      <td><%= podcast.podcast_episodes.count %></td>
+      <td><small><%= podcast.status_notice %></small></td>
+      <td>
+        <%= link_to "Edit", edit_podcast_path(podcast.id) %>
+        <%= form_for(podcast, url: fetch_podcast_path(podcast.id)) { |f| f.button "fetch" } %>
+      </td>
+    </tr>
+  <% end %>
+</table>
