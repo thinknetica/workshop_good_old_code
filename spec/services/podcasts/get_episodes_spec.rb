@@ -1,8 +1,5 @@
 require "rails_helper"
 
-# Podcast.skip_callback :commit, :after, :pull_all_episodes
-# Podcast.set_callback :commit, :after, :pull_all_episodes
-
 vcr_options = {
   cassette_name: "se_daily_rss_feed",
   allow_playback_repeats: "true",
@@ -17,6 +14,16 @@ RSpec.describe Podcasts::GetEpisodes, vcr: vcr_options do
 
   let(:unpodcast_rss) { "http://podcast.example.com/podcast" }
 
+  # concerning!
+  before do
+    Podcast.skip_callback :commit, :after, :pull_all_episodes
+  end
+
+  # concerning!
+  after do
+    Podcast.set_callback :commit, :after, :pull_all_episodes
+  end
+
   it "fetches episodes" do
     expect {
       described_class.new(podcast).call
@@ -24,7 +31,15 @@ RSpec.describe Podcasts::GetEpisodes, vcr: vcr_options do
   end
 
   it "fetches correct episodes" do
-    described_class.new(podcast).call
+    expect(podcast.podcast_episodes.find_by(title: "Engineering Insights with Christina Forney").present?).to be false
+    described_class.new(podcast).call(limit: 2)
     expect(podcast.podcast_episodes.find_by(title: "Engineering Insights with Christina Forney")).to be_a(PodcastEpisode)
+  end
+
+  it "handles errors" do
+    allow(HTTParty).to receive(:get).with(feed_url).and_raise(Errno::ECONNREFUSED)
+    described_class.new(podcast).call(limit: 2)
+    podcast.reload
+    expect(podcast.status_notice).to include("Unreachable")
   end
 end
