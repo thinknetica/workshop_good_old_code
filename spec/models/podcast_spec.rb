@@ -35,8 +35,14 @@ RSpec.describe Podcast, type: :model do
   end
 
   # stub HTTParty
-  xit "fetches correct episodes" do
+  it "fetches correct episodes" do
+    skip "not implemented"
     feed_obj = double("HTTParty::Response", body: feed)
     allow(HTTParty).to receive(:get).and_return(feed_obj)
+  end
+
+  it "sets unreachable status_notice" do
+    skip "not implemented"
+    allow(HTTParty).to receive(:get).with(feed_url).and_raise(Errno::ECONNREFUSED)
   end
 end
