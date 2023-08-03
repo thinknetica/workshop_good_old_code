@@ -77,8 +77,9 @@ RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
     end
 
     it "calls Podcasts::GetEpisodes" do
-      expect(Podcasts::GetEpisodes).to have_received(:new).with(podcast)
-      expect(get_eps).to have_received(:call)
+      patch podcast_path(podcast.id), params: { podcast: podcast_params }
+      expect(Podcasts::GetEpisodes).to have_received(:new).with(podcast).twice
+      expect(get_eps).to have_received(:call).twice
     end
   end
 
