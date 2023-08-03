@@ -1,5 +1,3 @@
-# Net::OpenTimeout, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError, HTTParty::RedirectionTooDeep => e
-# RSS::NotWellFormedError
 module Podcasts
   class GetEpisodes
     def initialize(podcast)
