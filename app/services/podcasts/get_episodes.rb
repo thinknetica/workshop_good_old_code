@@ -1,5 +1,7 @@
 module Podcasts
   class GetEpisodes
+    # Result = Struct.new(:success, :podcast, :feed_size, :new_episodes_count, :error, keyword_init: true)
+
     def initialize(podcast)
       @podcast = podcast
     end
@@ -33,6 +35,7 @@ module Podcasts
       podcast.update_column(:status_notice, "Unreachable #{e}")
     rescue RSS::NotWellFormedError
       podcast.update_column(:status_notice, "Rss couldn't be parsed")
+      # Result.new(success: false, error: e, podcast: podcast)
     end
 
     private
