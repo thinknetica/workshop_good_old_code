@@ -42,4 +42,15 @@ RSpec.describe Podcasts::GetEpisodes, vcr: vcr_options do
     podcast.reload
     expect(podcast.status_notice).to include("Unreachable")
   end
+
+  context "with Result object" do
+    it "returns success" do
+    end
+
+    it "returns error" do
+    end
+
+    it "returns episodes count" do
+    end
+  end
 end
