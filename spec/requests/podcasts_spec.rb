@@ -107,5 +107,29 @@ RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
       expect(Podcasts::GetEpisodes).to have_received(:new).with(podcast).twice
       expect(get_eps).to have_received(:call).at_least(2).times
     end
+
+    it "sets successful flash[:notice]" do
+      skip "not implemented"
+
+      # result = instance_spy(Podcasts::GetEpisodes::Result, success: true, feed_size: 10, new_episodes_count: 5)
+      # get_eps = instance_spy(Podcasts::GetEpisodes, call: result)
+      # allow(Podcasts::GetEpisodes).to receive(:new).and_return(get_eps)
+
+      patch fetch_podcast_path(podcast.id)
+      follow_redirect!
+      expect(response.body).to include("Fetched 5 episodes, feed size - 10")
+    end
+
+    it "sets flash[:error] when not successful" do
+      skip "not implemented"
+
+      # result = instance_spy(Podcasts::GetEpisodes::Result, success: false, error: "unreachable")
+      # get_eps = instance_spy(Podcasts::GetEpisodes, call: result)
+      # allow(Podcasts::GetEpisodes).to receive(:new).and_return(get_eps)
+
+      patch fetch_podcast_path(podcast.id)
+      follow_redirect!
+      expect(response.body).to include("Error while fetching: unreachable")
+    end
   end
 end
