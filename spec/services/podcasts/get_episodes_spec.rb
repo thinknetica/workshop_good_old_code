@@ -14,16 +14,6 @@ RSpec.describe Podcasts::GetEpisodes, vcr: vcr_options do
 
   let(:unpodcast_rss) { "http://podcast.example.com/podcast" }
 
-  # concerning!
-  before do
-    Podcast.skip_callback :commit, :after, :pull_all_episodes
-  end
-
-  # concerning!
-  after do
-    Podcast.set_callback :commit, :after, :pull_all_episodes
-  end
-
   it "fetches episodes" do
     expect {
       described_class.new(podcast).call

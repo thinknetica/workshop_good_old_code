@@ -1,6 +1,6 @@
 module Podcasts
   class GetEpisodes
-    # Result = Struct.new(:success, :podcast, :feed_size, :new_episodes_count, :error, keyword_init: true)
+    Result = Struct.new(:success, :podcast, :feed_size, :new_episodes_count, :error, keyword_init: true)
 
     def initialize(podcast)
       @podcast = podcast
@@ -11,6 +11,7 @@ module Podcasts
     end
 
     def call(limit: 100)
+      episodes_were = podcast.podcast_episodes.count
       rss = HTTParty.get(podcast.feed_url).body.to_s
       feed = RSS::Parser.parse(rss, false)
       feed.items.each do |item|
@@ -30,12 +31,14 @@ module Podcasts
           ep.save!
         end
       end
-      feed.items.size
+      new_episodes_count = episodes_were - podcast.podcast_episodes.count
+      Result.new(success: true, podcast: podcast, feed_size: feed.items.size, new_episodes_count: new_episodes_count)
     rescue Net::OpenTimeout, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError, HTTParty::RedirectionTooDeep => e
       podcast.update_column(:status_notice, "Unreachable #{e}")
+      Result.new(success: false, error: e, podcast: podcast)
     rescue RSS::NotWellFormedError
       podcast.update_column(:status_notice, "Rss couldn't be parsed")
-      # Result.new(success: false, error: e, podcast: podcast)
+      Result.new(success: false, error: e, podcast: podcast)
     end
 
     private

@@ -9,14 +9,6 @@ RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
   let(:feed_url) { "http://softwareengineeringdaily.com/feed/podcast/" }
 
   describe "GET /index" do
-    before do
-      Podcast.skip_callback :commit, :after, :pull_all_episodes
-    end
-
-    after do
-      Podcast.set_callback :commit, :after, :pull_all_episodes
-    end
-
     it "renders successfully" do
       get podcasts_path
       expect(response).to have_http_status(:ok)
@@ -40,7 +32,7 @@ RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
     end
 
     it "creates a podcast" do
-      get_eps = instance_spy(Podcasts::GetEpisodes, call: 1)
+      get_eps = instance_double(Podcasts::GetEpisodes, call: 1)
       allow(Podcasts::GetEpisodes).to receive(:new).and_return(get_eps)
       expect do
         post podcasts_path, params: { podcast: podcast_params }
@@ -78,18 +70,15 @@ RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
 
     it "calls Podcasts::GetEpisodes" do
       patch podcast_path(podcast.id), params: { podcast: podcast_params }
-      expect(Podcasts::GetEpisodes).to have_received(:new).with(podcast).twice
-      expect(get_eps).to have_received(:call).twice
+      expect(Podcasts::GetEpisodes).to have_received(:new).with(podcast).at_least(1)
+      expect(get_eps).to have_received(:call).at_least(1)
     end
   end
 
   describe "PATCH /fetch" do
+    let(:podcast) { create(:podcast, feed_url: feed_url) }
     # actually fetching/parsing
     it "fetches a podcast" do
-      Podcast.skip_callback :commit, :after, :pull_all_episodes
-      podcast = create(:podcast, feed_url: feed_url)
-      Podcast.set_callback :commit, :after, :pull_all_episodes
-
       patch fetch_podcast_path(podcast.id)
 
       expect(podcast.podcast_episodes).not_to be_empty
@@ -98,22 +87,19 @@ RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
 
     # stubbing
     it "calls Podcasts::GetEpisodes" do
-      get_eps = instance_spy(Podcasts::GetEpisodes, call: 1)
+      result = instance_double(Podcasts::GetEpisodes::Result, success: true, new_episodes_count: 100, feed_size: 100)
+      get_eps = instance_spy(Podcasts::GetEpisodes, call: result)
       allow(Podcasts::GetEpisodes).to receive(:new).and_return(get_eps)
 
-      podcast = create(:podcast, feed_url: feed_url)
-
       patch fetch_podcast_path(podcast.id)
-      expect(Podcasts::GetEpisodes).to have_received(:new).with(podcast).twice
-      expect(get_eps).to have_received(:call).at_least(2).times
+      expect(Podcasts::GetEpisodes).to have_received(:new).with(podcast)
+      expect(get_eps).to have_received(:call).once
     end
 
     it "sets successful flash[:notice]" do
-      skip "not implemented"
-
-      # result = instance_spy(Podcasts::GetEpisodes::Result, success: true, feed_size: 10, new_episodes_count: 5)
-      # get_eps = instance_spy(Podcasts::GetEpisodes, call: result)
-      # allow(Podcasts::GetEpisodes).to receive(:new).and_return(get_eps)
+      result = instance_double(Podcasts::GetEpisodes::Result, success: true, feed_size: 10, new_episodes_count: 5)
+      get_eps = instance_double(Podcasts::GetEpisodes, call: result)
+      allow(Podcasts::GetEpisodes).to receive(:new).and_return(get_eps)
 
       patch fetch_podcast_path(podcast.id)
       follow_redirect!
@@ -121,11 +107,9 @@ RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
     end
 
     it "sets flash[:error] when not successful" do
-      skip "not implemented"
-
-      # result = instance_spy(Podcasts::GetEpisodes::Result, success: false, error: "unreachable")
-      # get_eps = instance_spy(Podcasts::GetEpisodes, call: result)
-      # allow(Podcasts::GetEpisodes).to receive(:new).and_return(get_eps)
+      result = instance_double(Podcasts::GetEpisodes::Result, success: false, error: "unreachable")
+      get_eps = instance_double(Podcasts::GetEpisodes, call: result)
+      allow(Podcasts::GetEpisodes).to receive(:new).and_return(get_eps)
 
       patch fetch_podcast_path(podcast.id)
       follow_redirect!

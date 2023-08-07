@@ -14,7 +14,7 @@ class PodcastsController < ApplicationController
   def create
     @podcast = Podcast.create(podcast_params)
     if @podcast.persisted?
-      # Podcasts::GetEpisodes.call(@podcast)
+      Podcasts::GetEpisodes.call(@podcast)
       flash[:notice] = "Podcast saved"
       redirect_to podcasts_path
     else
@@ -30,7 +30,7 @@ class PodcastsController < ApplicationController
     @podcast = Podcast.find(params[:id])
     success = @podcast.update(podcast_params)
     if success
-      # Podcasts::GetEpisodes.call(@podcast)
+      Podcasts::GetEpisodes.call(@podcast)
       flash[:notice] = "Saved successfully"
       redirect_to podcasts_path
     else
@@ -41,13 +41,12 @@ class PodcastsController < ApplicationController
 
   def fetch
     @podcast = Podcast.find(params[:id])
-    # Podcasts::GetEpisodes.call(podcast)
-    if @podcast.save
-      flash[:notice] = "Fetched episodes"
+    result = Podcasts::GetEpisodes.call(@podcast)
+    if result.success
+      flash[:notice] = "Fetched #{result.new_episodes_count} episodes, feed size - #{result.feed_size}"
     else
-      flash[:error] = "Error while fetching: #{@podcast.status_notice}"
+      flash[:error] = "Error while fetching: #{result.error}"
     end
-
     redirect_to podcasts_url
   end
 
