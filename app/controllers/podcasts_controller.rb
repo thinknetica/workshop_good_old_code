@@ -45,7 +45,7 @@ class PodcastsController < ApplicationController
     if @podcast.save
       flash[:notice] = "Fetched episodes"
     else
-      flash[:error] = "Error while fetching: #{result.podcast.status_notice}"
+      flash[:error] = "Error while fetching: #{@podcast.status_notice}"
     end
 
     redirect_to podcasts_url
