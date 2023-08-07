@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_28_092048) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_07_121140) do
   create_table "podcast_episodes", force: :cascade do |t|
     t.integer "podcast_id"
     t.string "title", null: false
@@ -37,6 +37,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_28_092048) do
     t.text "status_notice", default: ""
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "language"
     t.index ["slug"], name: "index_podcasts_on_slug", unique: true
   end
 
