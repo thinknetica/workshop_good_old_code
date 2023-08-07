@@ -13,8 +13,8 @@ class PodcastsController < ApplicationController
 
   def create
     @podcast = Podcast.create(podcast_params)
-    # Podcasts::GetEpisodes.call(@podcast)
-    if @podcast.save
+    if @podcast.persisted?
+      # Podcasts::GetEpisodes.call(@podcast)
       flash[:notice] = "Podcast saved"
       redirect_to podcasts_path
     else
