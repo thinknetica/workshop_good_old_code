@@ -96,7 +96,7 @@ RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
       expect(podcast.podcast_episodes.find_by(title: "Engineering Insights with Christina Forney")).to be_a(PodcastEpisode)
     end
 
-    # stubbing
+    # stubbed call / mock
     it "calls Podcasts::GetEpisodes" do
       get_eps = instance_spy(Podcasts::GetEpisodes, call: 1)
       allow(Podcasts::GetEpisodes).to receive(:new).and_return(get_eps)
@@ -104,6 +104,7 @@ RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
       podcast = create(:podcast, feed_url: feed_url)
 
       patch fetch_podcast_path(podcast.id)
+
       expect(Podcasts::GetEpisodes).to have_received(:new).with(podcast).twice
       expect(get_eps).to have_received(:call).at_least(2).times
     end

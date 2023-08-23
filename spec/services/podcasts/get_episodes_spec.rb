@@ -25,15 +25,15 @@ RSpec.describe Podcasts::GetEpisodes, vcr: vcr_options do
   end
 
   it "fetches episodes" do
-    expect {
+    expect do
       described_class.new(podcast).call
-    }.to change(podcast.podcast_episodes, :count)
+    end.to change(podcast.podcast_episodes, :count)
   end
 
   it "fetches correct episodes" do
-    expect(podcast.podcast_episodes.find_by(title: "Engineering Insights with Christina Forney").present?).to be false
-    described_class.new(podcast).call(limit: 2)
-    expect(podcast.podcast_episodes.find_by(title: "Engineering Insights with Christina Forney")).to be_a(PodcastEpisode)
+    expect do
+      described_class.new(podcast).call
+    end.to change(podcast.podcast_episodes.where(title: "Engineering Insights with Christina Forney"), :count).by(1)
   end
 
   it "handles errors" do
