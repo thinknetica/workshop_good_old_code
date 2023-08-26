@@ -31,12 +31,12 @@ module Podcasts
           ep.save!
         end
       end
-      new_episodes_count = episodes_were - podcast.podcast_episodes.count
+      new_episodes_count = podcast.podcast_episodes.count - episodes_were
       Result.new(success: true, podcast: podcast, feed_size: feed.items.size, new_episodes_count: new_episodes_count)
     rescue Net::OpenTimeout, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError, HTTParty::RedirectionTooDeep => e
       podcast.update_column(:status_notice, "Unreachable #{e}")
       Result.new(success: false, error: e, podcast: podcast)
-    rescue RSS::NotWellFormedError
+    rescue RSS::NotWellFormedError => e
       podcast.update_column(:status_notice, "Rss couldn't be parsed")
       Result.new(success: false, error: e, podcast: podcast)
     end
