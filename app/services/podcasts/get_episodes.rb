@@ -21,7 +21,7 @@ module Podcasts
           ep.slug = item.title.downcase.gsub(/[^0-9a-z ]/i, "").gsub(" ", "-")
           ep.guid = item.guid
           ep.media_url = item.enclosure.url
-          # ep.reachable = enclosure_url_reachable(item.enclosure.url)
+          ep.reachable = enclosure_url_reachable(item.enclosure.url)
           begin
             ep.published_at = item.pubDate.to_date
           rescue
