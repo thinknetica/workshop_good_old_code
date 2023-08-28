@@ -18,7 +18,7 @@ xmlns:googleplay="http://www.google.com/schemas/play-podcasts/1.0"
 	<title>Podcast Archives - Software Engineering Daily</title>
 	<atom:link href="https://softwareengineeringdaily.com/category/podcast/feed/" rel="self" type="application/rss+xml" />
 	<link>http://softwareengineeringdaily.com/category/all-episodes/exclusive-content/podcast/</link>
-	<description></description>
+	<description>Test channel description with english text</description>
 	<lastBuildDate>Thu, 13 Jul 2023 16:22:43 +0000</lastBuildDate>
 	<language>en-US</language>
 	<sy:updatePeriod>
