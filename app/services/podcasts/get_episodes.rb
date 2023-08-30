@@ -35,10 +35,10 @@ module Podcasts
       Result.new(success: true, podcast: podcast, feed_size: feed.items.size, new_episodes_count: new_episodes_count)
     rescue Net::OpenTimeout, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError, HTTParty::RedirectionTooDeep => e
       podcast.update_column(:status_notice, "Unreachable #{e}")
-      Result.new(success: false, error: e, podcast: podcast)
+      Result.new(success: false, error: e.message, podcast: podcast)
     rescue RSS::NotWellFormedError => e
       podcast.update_column(:status_notice, "Rss couldn't be parsed")
-      Result.new(success: false, error: e, podcast: podcast)
+      Result.new(success: false, error: e.message, podcast: podcast)
     end
 
     private

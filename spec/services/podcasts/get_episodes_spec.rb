@@ -20,9 +20,11 @@ RSpec.describe Podcasts::GetEpisodes, vcr: vcr_options do
   end
 
   it "fetches correct episodes" do
-    expect(podcast.podcast_episodes.find_by(title: podcast_title).present?).to be false
-    described_class.call(podcast)
-    expect(podcast.podcast_episodes.find_by(title: podcast_title)).to be_a(PodcastEpisode)
+    aggregate_failures do
+      expect(podcast.podcast_episodes.find_by(title: podcast_title).present?).to be false
+      described_class.call(podcast)
+      expect(podcast.podcast_episodes.find_by(title: podcast_title)).to be_a(PodcastEpisode)
+    end
   end
 
   it "handles errors" do
@@ -34,7 +36,6 @@ RSpec.describe Podcasts::GetEpisodes, vcr: vcr_options do
 
   context "with Result object" do
     let(:result) { described_class.call(podcast) }
-    let(:error_message) { 'test error' }
 
     it "returns success" do
       aggregate_failures do
@@ -44,16 +45,16 @@ RSpec.describe Podcasts::GetEpisodes, vcr: vcr_options do
     end
 
     it "returns error" do
-      error_res = instance_double('Podcasts::GetEpisodes::Result', success: false, error: error_message)
-      allow(described_class).to receive(:call).and_return(error_res)
-      
+      allow(HTTParty).to receive(:get).with(feed_url).and_raise(Errno::ECONNREFUSED)
+
       aggregate_failures do
         expect(result.success).to be_falsey
-        expect(result.error).to eq(error_message)
+        expect(result.error).to eq("Connection refused")
       end
     end
 
     it "returns episodes count" do
+      stub_request(:get, feed_url).to_return(body: feed, status: 200)
       expect(result.new_episodes_count).to eq(100)
     end
   end
