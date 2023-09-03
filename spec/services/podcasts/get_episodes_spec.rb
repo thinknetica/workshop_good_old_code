@@ -9,38 +9,70 @@ RSpec.describe Podcasts::GetEpisodes, vcr: vcr_options do
   let(:feed_url) { "http://softwareengineeringdaily.com/feed/podcast/" }
   let(:podcast) { create(:podcast, feed_url: feed_url) }
 
-  let(:feed_path) { "../../support/fixtures/se_daily_rss_feed.rss" }
-  let(:feed) { File.read(File.join(File.dirname(__FILE__), feed_path)) }
+  context 'checking limit param' do
+    before do
+      stub_request(:head, /https:\/\/traffic.megaphone.fm/).to_return({ status: 200, body: "", headers: {} })
+    end
 
-  let(:unpodcast_rss) { "http://podcast.example.com/podcast" }
+    it "fetches episodes by default limit" do
+      described_class.new(podcast).call(limit: 100)
+      expect(podcast.podcast_episodes.count).to eq(100)
+    end
 
-  it "fetches episodes" do
-    expect {
-      described_class.new(podcast).call
-    }.to change(podcast.podcast_episodes, :count)
+    it "fetches episodes by certain limit" do
+      described_class.new(podcast).call(limit: 50)
+      expect(podcast.podcast_episodes.count).to eq(50)
+    end
+
+    it "fetches episodes by negative limit" do
+      described_class.new(podcast).call(limit: -50)
+      expect(podcast.podcast_episodes.count).to eq(50)
+    end
   end
 
-  it "fetches correct episodes" do
-    expect(podcast.podcast_episodes.find_by(title: "Engineering Insights with Christina Forney").present?).to be false
-    described_class.new(podcast).call(limit: 2)
-    expect(podcast.podcast_episodes.find_by(title: "Engineering Insights with Christina Forney")).to be_a(PodcastEpisode)
-  end
+  context 'fetching correct podcast episodes' do
+    it "fetches correct episodes" do
+      stub_request(:head, /https:\/\/traffic.megaphone.fm/).to_return({ status: 200, body: "", headers: {} })
+      expect(podcast.podcast_episodes.count).to eq(0)
+      expect(podcast.podcast_episodes.find_by(title: "SDKs for your API with Sagar Batchu").present?).to be_falsey
 
-  it "handles errors" do
-    allow(HTTParty).to receive(:get).with(feed_url).and_raise(Errno::ECONNREFUSED)
-    described_class.new(podcast).call(limit: 2)
-    podcast.reload
-    expect(podcast.status_notice).to include("Unreachable")
+      described_class.new(podcast).call(limit: 2)
+      expect(podcast.podcast_episodes.count).to eq(2)
+      expect(podcast.podcast_episodes.find_by(title: "SDKs for your API with Sagar Batchu")).to be_a(PodcastEpisode)
+    end
+
+    it "fetches reachable podcast episode" do
+      stub_request(:head, /https:\/\/traffic.megaphone.fm/).to_return({ status: 200, body: "", headers: {} })
+      described_class.new(podcast).call(limit: 1)
+      expect(podcast.podcast_episodes.first.reachable).to be_truthy
+    end
+
+    it "fetches unreachable podcast episode" do
+      stub_request(:head, /https:\/\/traffic.megaphone.fm/).to_return({ status: 404, body: "", headers: {} })
+      described_class.new(podcast).call(limit: 1)
+      expect(podcast.podcast_episodes.first.reachable).to be_falsey
+    end
   end
 
   context "with Result object" do
+    let(:result) { described_class.new(podcast).call(limit: 50) }
+
+    before do
+      stub_request(:head, /https:\/\/traffic.megaphone.fm/).to_return({ status: 200, body: "", headers: {} })
+    end
+
     it "returns success" do
+      expect(result.success).to be_truthy
     end
 
     it "returns error" do
+      allow(HTTParty).to receive(:get).with(feed_url).and_raise(Net::OpenTimeout)
+      expect(result.error).to be_present
+      expect(result.success).to be_falsey
     end
 
     it "returns episodes count" do
+      expect(result.new_episodes_count).to eq(50)
     end
   end
 end
