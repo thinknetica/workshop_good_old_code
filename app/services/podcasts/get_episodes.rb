@@ -15,19 +15,7 @@ module Podcasts
       feed = Podcasts::GetFeed.call(podcast)
       feed.items.each do |item|
         unless PodcastEpisode.find_by(media_url: item.enclosure.url).presence
-          ep = PodcastEpisode.new
-          ep.title = item.title
-          ep.podcast_id = podcast.id
-          ep.slug = item.title.downcase.gsub(/[^0-9a-z ]/i, "").gsub(" ", "-")
-          ep.guid = item.guid
-          ep.media_url = item.enclosure.url
-          # ep.reachable = enclosure_url_reachable(item.enclosure.url)
-          begin
-            ep.published_at = item.pubDate.to_date
-          rescue
-            puts "not valid date"
-          end
-          ep.save!
+          create_podcast_episode(item)
         end
       end
       new_episodes_count = podcast.podcast_episodes.count - episodes_were
@@ -42,6 +30,22 @@ module Podcasts
 
     def enclosure_url_reachable(url)
       HTTParty.head(url).code == 200
+    end
+
+    def create_podcast_episode(item)
+      ep            = PodcastEpisode.new
+      ep.title      = item.title
+      ep.podcast_id = podcast.id
+      ep.slug       = item.title.downcase.gsub(/[^0-9a-z ]/i, "").gsub(" ", "-")
+      ep.guid       = item.guid
+      ep.media_url  = item.enclosure.url
+      # ep.reachable  = enclosure_url_reachable(item.enclosure.url)
+      begin
+        ep.published_at = item.pubDate.to_date
+      rescue
+        puts "not valid date"
+      end
+      ep.save!
     end
   end
 end
