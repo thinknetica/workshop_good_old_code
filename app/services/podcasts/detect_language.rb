@@ -1,7 +1,7 @@
 module Podcasts
   class DetectLanguage
-    def initialize(podcast)
-      @podcast = podcast
+    def initialize(text)
+      @text = text
     end
 
     def self.call(...)
@@ -9,11 +9,11 @@ module Podcasts
     end
 
     def call
-      CLD3::NNetLanguageIdentifier.new(0, 1000).find_language(podcast.description).language
+      CLD3::NNetLanguageIdentifier.new(0, 1000).find_language(text).language
     end
 
     private
 
-    attr_reader :podcast
+    attr_reader :text
   end
 end

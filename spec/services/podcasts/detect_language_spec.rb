@@ -10,6 +10,6 @@ RSpec.describe Podcasts::DetectLanguage, vcr: vcr_options do
   let(:podcast) { create(:podcast, feed_url: feed_url, description: 'Thank you podcast') }
 
   it 'detects podcast\'s language and returns it as symbol' do
-    expect(described_class.call(podcast)).to eq :en
+    expect(described_class.call(podcast.description)).to eq :en
   end
 end
