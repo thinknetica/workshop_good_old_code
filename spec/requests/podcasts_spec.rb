@@ -3,6 +3,7 @@ require 'rails_helper'
 vcr_options = {
   cassette_name: "se_daily_rss_feed",
   allow_playback_repeats: "true",
+  record: :new_episodes
 }
 
 RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
