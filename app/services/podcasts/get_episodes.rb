@@ -12,16 +12,11 @@ module Podcasts
 
     def call(limit: 100)
       episodes_were = podcast.podcast_episodes.count
-      rss = HTTParty.get(podcast.feed_url).body.to_s
-      feed = RSS::Parser.parse(rss, false)
-      feed.items[0...limit.abs].each { |item| create_podcast_episode(item) }
+      feed = Podcasts::GetFeed.new(podcast).call
+      feed&.items[0...limit.abs]&.each { |item| create_podcast_episode(item) }
       new_episodes_count = podcast.podcast_episodes.count - episodes_were
-      Result.new(success: true, podcast: podcast, feed_size: feed.items.size, new_episodes_count: new_episodes_count)
-    rescue Net::OpenTimeout, Errno::ECONNREFUSED, Errno::EHOSTUNREACH, SocketError, HTTParty::RedirectionTooDeep => e
-      podcast.update_column(:status_notice, "Unreachable: #{e}")
-      Result.new(success: false, error: e, podcast: podcast)
-    rescue RSS::NotWellFormedError
-      podcast.update_column(:status_notice, "Rss couldn't be parsed")
+      Result.new(success: true, podcast: podcast, feed_size: feed&.items&.size, new_episodes_count: new_episodes_count)
+    rescue StandardError => e
       Result.new(success: false, error: e, podcast: podcast)
     end
 

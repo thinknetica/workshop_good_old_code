@@ -54,62 +54,25 @@ RSpec.describe Podcasts::GetEpisodes, vcr: vcr_options do
     end
   end
 
-  context 'catching exceptions' do
+  context "with Result object" do
+    let(:result) { described_class.new(podcast).call(limit: 50) }
+
     before do
       stub_request(:head, /https:\/\/traffic.megaphone.fm/).to_return({ status: 200, body: "", headers: {} })
     end
 
-    it "handles Net::OpenTimeout" do
-      allow(HTTParty).to receive(:get).with(feed_url).and_raise(Net::OpenTimeout)
-      described_class.new(podcast).call(limit: 2)
-      podcast.reload
-      expect(podcast.status_notice).to include("Unreachable:")
-    end
-
-    it "handles Errno::ECONNREFUSED" do
-      allow(HTTParty).to receive(:get).with(feed_url).and_raise(Errno::ECONNREFUSED)
-      described_class.new(podcast).call(limit: 2)
-      podcast.reload
-      expect(podcast.status_notice).to include("Unreachable:")
-    end
-
-    it "handles Errno::EHOSTUNREACH" do
-      allow(HTTParty).to receive(:get).with(feed_url).and_raise(Errno::EHOSTUNREACH)
-      described_class.new(podcast).call(limit: 2)
-      podcast.reload
-      expect(podcast.status_notice).to include("Unreachable:")
-    end
-
-    it "handles SocketError" do
-      allow(HTTParty).to receive(:get).with(feed_url).and_raise(SocketError)
-      described_class.new(podcast).call(limit: 2)
-      podcast.reload
-      expect(podcast.status_notice).to include("Unreachable:")
-    end
-
-    xit "handles HTTParty::RedirectionTooDeep" do
-      allow(HTTParty).to receive(:get).with(feed_url).and_raise(HTTParty::RedirectionTooDeep)
-      described_class.new(podcast).call(limit: 2)
-      podcast.reload
-      expect(podcast.status_notice).to include("Unreachable:")
-    end
-
-    it "handles RSS::NotWellFormedError" do
-      allow(HTTParty).to receive(:get).with(feed_url).and_raise(RSS::NotWellFormedError)
-      described_class.new(podcast).call(limit: 2)
-      podcast.reload
-      expect(podcast.status_notice).to include("Rss couldn't be parsed")
-    end
-  end
-
-  context "with Result object" do
     it "returns success" do
+      expect(result.success).to be_truthy
     end
 
     it "returns error" do
+      allow(HTTParty).to receive(:get).with(feed_url).and_raise(Net::OpenTimeout)
+      expect(result.error).to be_present
+      expect(result.success).to be_falsey
     end
 
     it "returns episodes count" do
+      expect(result.new_episodes_count).to eq(50)
     end
   end
 end

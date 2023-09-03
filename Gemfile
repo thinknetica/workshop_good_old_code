@@ -5,8 +5,6 @@ ruby "3.2.2"
 
 gem "cld3", "~> 3.5" # Ruby interface for Compact Language Detector v3
 
-# gem "detect_language", "~> 1.1.2"
-
 gem "httparty", "~> 0.21"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"

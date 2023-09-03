@@ -31,9 +31,11 @@ RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
       }
     end
 
+    before do
+      stub_request(:head, /https:\/\/traffic.megaphone.fm/).to_return({ status: 200, body: "", headers: {} })
+    end
+
     it "creates a podcast" do
-      get_eps = instance_double(Podcasts::GetEpisodes, call: 1)
-      allow(Podcasts::GetEpisodes).to receive(:new).and_return(get_eps)
       expect do
         post podcasts_path, params: { podcast: podcast_params }
       end.to change(Podcast, :count).by(1)
@@ -79,6 +81,7 @@ RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
     let(:podcast) { create(:podcast, feed_url: feed_url) }
     # actually fetching/parsing
     it "fetches a podcast" do
+      stub_request(:head, /https:\/\/traffic.megaphone.fm/).to_return({ status: 200, body: "", headers: {} })
       patch fetch_podcast_path(podcast.id)
 
       expect(podcast.podcast_episodes).not_to be_empty
