@@ -10,13 +10,15 @@ RSpec.describe Podcasts::GetFeed, vcr: vcr_options do
   let(:podcast) { create(:podcast, feed_url: feed_url) }
   let(:result) { described_class.new(podcast).call }
 
-  it 'detects podcast\'s language and returns it as symbol' do
-    expect(described_class.call(podcast)).to be_an_instance_of RSS::Rss
+  it 'returns success' do
+    feed_result = described_class.new(podcast).call
+    expect(feed_result.success).to be_truthy
+    expect(feed_result.feed).to be_a RSS::Rss
   end
 
   it "returns error" do
     allow(HTTParty).to receive(:get).with(feed_url).and_raise(Errno::ECONNREFUSED)
     expect(result.success).to be_falsey
-    expect(result.error).to be_present
+    expect(result.error).to be_a Errno::ECONNREFUSED
   end
 end

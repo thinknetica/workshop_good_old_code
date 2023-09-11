@@ -8,10 +8,8 @@ class Podcast < ApplicationRecord
   def detect_language
     return language.to_sym if language
 
-    lang = Podcasts::DetectLanguage.call(description)
-    self.update!(language: lang)
+    lang = DetectLanguage.call(description)
+    self.update(language: lang)
     lang
-  rescue StandardError => e
-    p e
   end
 end

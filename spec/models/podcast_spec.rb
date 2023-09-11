@@ -1,11 +1,6 @@
 require 'rails_helper'
 
-vcr_options = {
-  cassette_name: "se_daily_rss_feed",
-  allow_playback_repeats: "true"
-}
-
-RSpec.describe Podcast, type: :model, vcr: vcr_options do
+RSpec.describe Podcast, type: :model do
   let(:feed_url) { "http://softwareengineeringdaily.com/feed/podcast/" }
   let(:podcast) { create(:podcast, feed_url: feed_url, description: 'Thank you podcast') }
   let(:podcast_with_lang) { create(:podcast, feed_url: feed_url, language: 'en', description: 'Thank you podcast') }

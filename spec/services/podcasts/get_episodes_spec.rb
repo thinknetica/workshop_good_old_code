@@ -38,5 +38,13 @@ RSpec.describe Podcasts::GetEpisodes, vcr: vcr_options do
       expect(result.new_episodes_count).to be_integer
       expect(result.new_episodes_count).to eq 100
     end
+
+    it "returns error" do
+      Result = Struct.new(:success, :podcast, :feed_size, :new_episodes_count, :error, keyword_init: true)
+      allow_any_instance_of(Podcasts::GetEpisodes).to receive(:call).and_return(Result.new(success: false, error: 'error text'))
+
+      expect(result.success).to be_falsey
+      expect(result.error).to eq 'error text'
+    end
   end
 end

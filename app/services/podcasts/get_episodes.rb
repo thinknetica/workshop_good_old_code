@@ -12,14 +12,20 @@ module Podcasts
 
     def call(limit: 100)
       episodes_were = podcast.podcast_episodes.count
-      feed = Podcasts::GetFeed.call(podcast)
-      feed.items.each do |item|
-        unless PodcastEpisode.find_by(media_url: item.enclosure.url).presence
-          create_podcast_episode(item)
+      feed_result = Podcasts::GetFeed.call(podcast)
+
+      if feed_result.success
+        feed_result.feed.items.each do |item|
+          unless PodcastEpisode.find_by(media_url: item.enclosure.url).presence
+            create_podcast_episode(item)
+          end
         end
+
+        new_episodes_count = podcast.podcast_episodes.count - episodes_were
+        Result.new(success: true, podcast: podcast, feed_size: feed_result.feed.items.size, new_episodes_count: new_episodes_count)
+      else
+        Result.new(success: false, error: feed_result.error, podcast: podcast)
       end
-      new_episodes_count = podcast.podcast_episodes.count - episodes_were
-      Result.new(success: true, podcast: podcast, feed_size: feed.items.size, new_episodes_count: new_episodes_count)
     rescue StandardError => e
       Result.new(success: false, error: e, podcast: podcast)
     end

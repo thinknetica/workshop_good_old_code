@@ -45,6 +45,12 @@ RSpec.describe "Podcasts", vcr: vcr_options, type: :request do
       podcast = Podcast.find_by(feed_url: feed_url)
       expect(podcast.podcast_episodes).not_to be_empty
     end
+
+    it "updates description" do
+      post podcasts_path, params: { podcast: podcast_params }
+      podcast = Podcast.find_by(feed_url: feed_url)
+      expect(podcast.description).not_to be_empty
+    end
   end
 
   describe "PUT /update" do
