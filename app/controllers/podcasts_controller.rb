@@ -14,6 +14,9 @@ class PodcastsController < ApplicationController
   def create
     @podcast = Podcast.create(podcast_params)
     if @podcast.persisted?
+      podcast_feed = Podcasts::GetFeed.call(@podcast).feed
+      # @podcast.description = podcast_feed.channel.description
+      @podcast.update(description: podcast_feed.channel.description)
       Podcasts::GetEpisodes.call(@podcast)
       flash[:notice] = "Podcast saved"
       redirect_to podcasts_path

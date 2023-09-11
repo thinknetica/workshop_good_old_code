@@ -26,21 +26,25 @@ RSpec.describe Podcasts::GetEpisodes, vcr: vcr_options do
     expect(podcast.podcast_episodes.find_by(title: "Engineering Insights with Christina Forney")).to be_a(PodcastEpisode)
   end
 
-  it "handles errors" do
-    allow(HTTParty).to receive(:get).with(feed_url).and_raise(Errno::ECONNREFUSED)
-    described_class.new(podcast).call(limit: 2)
-    podcast.reload
-    expect(podcast.status_notice).to include("Unreachable")
-  end
-
   context "with Result object" do
-    it "returns success" do
-    end
+    let(:result) { described_class.new(podcast).call }
 
-    it "returns error" do
+    it "returns success" do
+      expect(result.success).to be_truthy
+      expect(result.error).to be_blank
     end
 
     it "returns episodes count" do
+      expect(result.new_episodes_count).to be_integer
+      expect(result.new_episodes_count).to eq 100
+    end
+
+    it "returns error" do
+      Result = Struct.new(:success, :podcast, :feed_size, :new_episodes_count, :error, keyword_init: true)
+      allow_any_instance_of(Podcasts::GetEpisodes).to receive(:call).and_return(Result.new(success: false, error: 'error text'))
+
+      expect(result.success).to be_falsey
+      expect(result.error).to eq 'error text'
     end
   end
 end

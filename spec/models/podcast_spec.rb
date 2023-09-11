@@ -2,13 +2,30 @@ require 'rails_helper'
 
 RSpec.describe Podcast, type: :model do
   let(:feed_url) { "http://softwareengineeringdaily.com/feed/podcast/" }
-  let(:podcast) { create(:podcast, feed_url: feed_url) }
+  let(:podcast) { create(:podcast, feed_url: feed_url, description: 'Thank you podcast') }
+  let(:podcast_with_lang) { create(:podcast, feed_url: feed_url, language: 'en', description: 'Thank you podcast') }
 
   let(:feed_path) { "../support/fixtures/se_daily_rss_feed.rss" }
   let(:feed) { File.read(File.join(File.dirname(__FILE__), feed_path)) }
 
   it "is valid" do
     expect(podcast.valid?).to be true
+  end
+
+  describe '#detect_language' do
+    describe 'showing podcast\'s language' do
+      context 'when language is not present' do
+        it 'detects and shows language' do
+          expect(podcast.detect_language).to eq :en
+        end
+      end
+
+      context 'when language is present' do
+        it 'only shows language without further detection' do
+          expect(podcast_with_lang.detect_language).to eq :en
+        end
+      end
+    end
   end
 
   # it "fetches episodes" do
